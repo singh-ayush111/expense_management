@@ -51,6 +51,75 @@ if (logoutBtn) {
     });
 }
 
+
+const budgetForm = document.getElementById('budget-form');
+
+if (budgetForm) {
+    budgetForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        const category = document.getElementById('budget-category').value;
+        const limit = document.getElementById('budget-limit').value;
+
+        await fetch(`${API_URL}/budgets`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            },
+            body: JSON.stringify({ category, limit })
+        });
+        
+        document.getElementById('budget-limit').value = '';
+        loadBudgets(); 
+    });
+}
+
+async function loadBudgets() {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/budgets`, {
+        headers: { 'x-auth-token': token }
+    });
+    const budgets = await res.json();
+    
+    const list = document.getElementById('budget-list');
+    list.innerHTML = '';
+    
+    budgets.forEach(b => {
+        const div = document.createElement('div');
+        div.className = 'budget-item';
+        div.innerHTML = `
+            <div>
+                <strong>${b.category}</strong> 
+                <span class="budget-limit">Rs. ${b.limit}</span>
+            </div>
+            <button class="delete-budget-btn" onclick="deleteBudget('${b._id}')">X</button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+async function deleteBudget(id) {
+    if(!confirm('Are you sure you want to remove this budget?')) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`${API_URL}/budgets/${id}`, {
+            method: 'DELETE',
+            headers: { 'x-auth-token': token }
+        });
+
+        if (res.ok) {
+            loadBudgets(); 
+        } else {
+            alert('Error deleting budget');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
 if (expenseForm) {
     expenseForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -59,7 +128,7 @@ if (expenseForm) {
         const amount = document.getElementById('amount').value;
         const category = document.getElementById('category').value;
 
-        await fetch(`${API_URL}/expenses`, {
+        const res = await fetch(`${API_URL}/expenses`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -68,10 +137,28 @@ if (expenseForm) {
             body: JSON.stringify({ description: desc, amount, category })
         });
         
+        const data = await res.json();
+        
+        if (data.alert && data.alert.overBudget) {
+            showAlert(data.alert.message);
+        } else {
+            hideAlert();
+        }
+        
         document.getElementById('desc').value = '';
         document.getElementById('amount').value = '';
         loadExpenses();
     });
+}
+
+function showAlert(msg) {
+    const banner = document.getElementById('alert-banner');
+    document.getElementById('alert-msg').innerText = msg;
+    banner.classList.remove('hidden');
+}
+
+function hideAlert() {
+    document.getElementById('alert-banner').classList.add('hidden');
 }
 
 async function loadExpenses() {

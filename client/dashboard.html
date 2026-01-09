@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Expense Tracker</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,44 +12,68 @@
         <button id="logout-btn">Logout</button>
     </nav>
 
-    <div class="container">
-        <div class="summary-cards">
-            <div class="card">
-                <h3>Total Expenses</h3>
-                <p id="total-amount">0.00</p>
+    <div id="alert-banner" class="alert-banner hidden">
+        <span id="alert-msg"></span>
+        <button onclick="document.getElementById('alert-banner').classList.add('hidden')">X</button>
+    </div>
+
+    <div class="main-layout">
+        <div class="content-area">
+            <div class="summary-cards">
+                <div class="card">
+                    <h3>Total Expenses</h3>
+                    <p id="total-amount">$0.00</p>
+                </div>
+                <div class="card">
+                    <h3>Transactions</h3>
+                    <p id="total-count">0</p>
+                </div>
             </div>
-            <div class="card">
-                <h3>Transaction Count</h3>
-                <p id="total-count">0</p>
+
+            <div class="form-section">
+                <h3>Add New Expense</h3>
+                <form id="expense-form">
+                    <input type="text" id="desc" placeholder="Description" required>
+                    <input type="number" id="amount" placeholder="Amount" required>
+                    <select id="category">
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Entertainment">Entertainment</option>
+                    </select>
+                    <button type="submit">Add Expense</button>
+                </form>
+            </div>
+
+            <div class="list-section">
+                <h3>History</h3>
+                <ul id="expense-list" class="list"></ul>
             </div>
         </div>
 
-        <div class="form-section">
-            <h3>Add New Expense</h3>
-            <form id="expense-form">
-                <input type="text" id="desc" placeholder="Description (e.g., Grocery)" required>
-                <input type="number" id="amount" placeholder="Amount" required>
-                <select id="category">
+        <div class="sidebar">
+            <h3>Set Category Budgets</h3>
+            <form id="budget-form">
+                <select id="budget-category">
                     <option value="Food">Food</option>
                     <option value="Transport">Transport</option>
                     <option value="Utilities">Utilities</option>
                     <option value="Entertainment">Entertainment</option>
-                    <option value="Other">Other</option>
                 </select>
-                <button type="submit">Add Expense</button>
+                <input type="number" id="budget-limit" placeholder="Limit ($)" required>
+                <button type="submit" class="secondary-btn">Set Limit</button>
             </form>
-        </div>
 
-        <div class="list-section">
-            <h3>History</h3>
-            <ul id="expense-list" class="list">
-                </ul>
+            <div id="budget-list" class="budget-list">
+                </div>
         </div>
     </div>
+
     <script src="script.js"></script>
     <script>
         if(!localStorage.getItem('token')) window.location.href = 'index.html';
         loadExpenses();
+        loadBudgets(); 
     </script>
 </body>
 </html>
